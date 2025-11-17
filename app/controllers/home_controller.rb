@@ -1,0 +1,18 @@
+class HomeController < ApplicationController
+  # before_action :authenticate_user!, only: [:index]
+
+  
+  
+  def index
+    if current_user
+      if session[:tenant_id]
+        Tenant.set_current_tenant session[:tenant_id]
+      else
+        Tenant.set_current_tenant current_user.tenants.first
+      end
+
+      @tenant = Tenant.set_current_tenant
+      params[:tenant_id] = @tenant.id
+    end 
+  end
+end
