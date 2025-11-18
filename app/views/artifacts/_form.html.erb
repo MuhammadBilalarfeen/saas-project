@@ -1,0 +1,35 @@
+<%= form_with(model: artifact) do |form| %>
+  <% if artifact.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(artifact.errors.count, "error") %> prohibited this artifact from being saved:</h2>
+
+      
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :name, style: "display: block" %>
+    <%= form.text_field :name %>
+  </div>
+
+  <div class="control-group">
+      <%= f.label :upload, value: 'File to upload', :class => 'control-label' %>
+      <div class="controls">
+      <%= f.file_field :upload, :class => 'form-control' %>
+  </div>
+
+  <div>
+    <%= form.label :project_id, style: "display: block" %>
+    <%= f.hidden_field :project_id %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+
+ <div> 
+  <%= link_to t('.cancel', :default => t("helpers.links.cancel")),
+  tenant_project_path(tenant_id: Tenant.current_tenant_id,
+  id: @artifact.project_id), :class => 'btn btn-default' %>
+ </div>
+<% end %>

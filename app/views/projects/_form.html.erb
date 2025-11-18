@@ -1,0 +1,36 @@
+<%= form_with(model: [@tenant, @project], local: true, html: { multipart: true, class: "form-horizontal project" }) do |f| %>
+
+  <!-- Existing fields -->
+  <div class="mb-3">
+    <%= f.label :title %>
+    <%= f.text_field :title, class: "form-control" %>
+  </div>
+
+  <div class="mb-3">
+    <%= f.label :details %>
+    <%= f.text_area :details, class: "form-control" %>
+  </div>
+
+  <div class="mb-3">
+    <%= f.label :expected_completion_date %>
+    <%= f.date_field :expected_completion_date, class: "form-control" %>
+  </div>
+
+  <!-- Add the PDF and image uploads here -->
+  <div class="mb-3">
+    <%= f.label :pdf_file, "Upload PDF" %>
+    <%= f.file_field :pdf_file, class: "form-control" %>
+  </div>
+
+  <div class="mb-3">
+    <%= f.label :images, "Upload Images" %>
+    <%= f.file_field :images, multiple: true, class: "form-control" %>
+  </div>
+
+  <!-- Submit button -->
+  <div class="mt-3">
+    <%= f.submit "Save", class: "btn btn-primary" %>
+    <%= link_to "Cancel", root_path, class: "btn btn-secondary ms-2" %>
+  </div>
+
+<% end %>

@@ -18,6 +18,7 @@ gem "stimulus-rails"
 gem "jquery-rails"         # jQuery for Bootstrap 3 scripts
 gem "bootstrap", "~> 5.3"  # Only CSS used! Do NOT load bootstrap.js via gem.
 gem "popper_js"
+gem 'stripe'
 
 # -----------------------------
 # Authentication

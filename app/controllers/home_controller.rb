@@ -1,18 +1,23 @@
 class HomeController < ApplicationController
+  # Uncomment if you want to require login
   # before_action :authenticate_user!, only: [:index]
 
-  
-  
   def index
-    if current_user
-      if session[:tenant_id]
-        Tenant.set_current_tenant session[:tenant_id]
-      else
-        Tenant.set_current_tenant current_user.tenants.first
-      end
+    if session[:tenant_id]
+      @tenant = Tenant.find_by(id: session[:tenant_id])
+      Tenant.set_current_tenant(@tenant) if @tenant
+    elsif current_user&.tenants&.any?
+      @tenant = current_user.tenants.first
+      Tenant.set_current_tenant(@tenant)
+    else
+      @tenant = nil
+    end
 
-      @tenant = Tenant.set_current_tenant
-      params[:tenant_id] = @tenant.id
-    end 
+    if @tenant
+      @projects = Project.by_plan_and_tenant(@tenant.id)
+      @project = Project.new  # ← Add this line
+    else
+      @projects = []
+    end
   end
 end

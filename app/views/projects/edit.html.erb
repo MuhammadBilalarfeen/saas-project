@@ -1,0 +1,12 @@
+<% content_for :title, "Editing project" %>
+
+<h1>Editing project</h1>
+
+<%= render "form", project: @project %>
+
+<br>
+
+<div class="mt-3">
+  <%= link_to "Show this project", tenant_project_path(@tenant, @project), class: "btn btn-info" %>
+  <%= link_to "Back to projects", tenant_projects_path(@tenant), class: "btn btn-secondary ms-2" %>
+</div>
