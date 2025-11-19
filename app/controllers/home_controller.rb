@@ -14,7 +14,7 @@ class HomeController < ApplicationController
     end
 
     if @tenant
-      @projects = Project.by_plan_and_tenant(@tenant.id)
+      @projects = Project.by_user_plan_and_tenant(@tenant.id, current_user)
       @project = Project.new  # ← Add this line
     else
       @projects = []

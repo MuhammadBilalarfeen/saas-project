@@ -2,10 +2,12 @@ class ProjectsController < ApplicationController
   before_action :set_project, only: %i[show edit update destroy]
   before_action :set_tenant, only: %i[show edit update destroy new create]
   before_action :verify_tenant
+  before_action :set_project, only: [:show, :edit, :update, :destroy, :users, :add_user]
+  before_action :set_tenant, only: [:show, :edit, :update, :destroy, :new, :create, :users, :add_user]
 
   # GET /projects
   def index
-    @projects = Project.all
+    @projects = Project.by_user_plan_and_tenant(params[:tenant_id], current_user)
   end
 
   # GET /projects/1
@@ -24,6 +26,7 @@ class ProjectsController < ApplicationController
   # POST /projects
   def create
     @project = Project.new(project_params)
+    @project.users << current_user
 
     if @project.save
       redirect_to root_url, notice: "Project was successfully created."

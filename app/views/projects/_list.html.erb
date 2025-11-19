@@ -30,6 +30,7 @@
               <td><%= project.expected_completion_date %></td>
               <td class="d-flex gap-1">
                 <%= link_to 'Edit', edit_tenant_project_path(project, tenant_id: @tenant.id), class: 'btn btn-sm btn-info' %>
+                <%= link_to 'Edit Users', users_tenant_project_path(project, tenant_id: @tenant.id), :class => 'btn btn-default btn-xs' %>
                 <%= link_to 'Delete', tenant_project_path(project, tenant_id: @tenant.id), method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-sm btn-danger' %>
               </td>
             </tr>

@@ -2,68 +2,30 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title><%= content_for?(:title) ? yield(:title) : "SaasProjectApp" %></title>
+  <title><%= content_for?(:title) ? yield(:title) : "SaasProjectApp" %></title>
 
-    <%= csrf_meta_tags %>
-    
-    <%= javascript_include_tag "https://js.stripe.com/v2/" %>
-    <%= stylesheet_link_tag "custom", "data-turbo-track": "reload" %>
-    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
-    <%= javascript_include_tag "application", defer: true %>
+  <%= csrf_meta_tags %>
+
+  <!-- Stripe -->
+  <%= javascript_include_tag "https://js.stripe.com/v2/" %>
+
+  <!-- Sprockets Styles -->
+  <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+  <%= stylesheet_link_tag "custom", "data-turbo-track": "reload" %>
+
+  <!-- Sprockets JS -->
+  <%= javascript_include_tag "application", defer: true %>
 
 
   </head>
 
   <body>
-   <nav class="navbar navbar-expand-lg navbar-light bg-light">
-      <div class="container">
-        <!-- Left side: Project name -->
-        <a class="navbar-brand" href="#">SaasProjectApp</a>
-
-        <% if current_user %>
-          <li class="nav-item">
-            <%= link_to "<i class='fa fa-users'></i> Add Members".html_safe,
-                        new_member_path,
-                        class: 'navbar-link btn btn-primary' %>
-          </li>
-        <% end %>
-
-        <!-- Toggler for mobile -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <!-- Right side: Sign In / user info -->
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav ms-auto">
-            <% if current_user %>
-              <li class="nav-item">
-                <%= link_to ('<i class="fa fa-user"></i> ' + truncate(current_user.email, length: 25)).html_safe,
-                            edit_user_registration_path,
-                            class: 'nav-link',
-                            title: 'Edit Profile' %>
-              </li>
-              <li class="nav-item">
-                <%= link_to "Sign Out", destroy_user_session_path, method: :delete, class: "btn btn-sm btn-danger logout-button" %>
-              </li>
-            <% else %>
-              <li class="nav-item">
-                <%= link_to "Sign In", new_user_session_path, class: "btn btn-sm btn-primary" %>
-              </li>
-            <% end %>
-          </ul>
-        </div>
-      </div>
-    </nav>
-
-
+    <%= render 'common/navbar' %>
 
     <div class="container mt-4">
-      <%= bootstrap_flash %>
       <%= yield %>
     </div>
-
   </body>
 </html>

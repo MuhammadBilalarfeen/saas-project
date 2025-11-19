@@ -1,0 +1,82 @@
+<script language="JavaScript">
+  Stripe.setPublishableKey("<%= ENV['STRIPE_TEST_PUBLISHABLE_KEY'] %>");
+</script>
+
+<h1>Edit Tenant Plan</h1>
+
+<%= form_for @tenant, url: update_plan_tenant_path(@tenant), html: { class: class_name_for_tenant_form(@tenant) } do |f| %>
+
+  <div class="row">
+    <!-- Organization Name -->
+    <div class="form-group col-md-6 no-left-padding">
+      <%= f.label :name, 'Organization' %>
+      <span class='description'>(Unique name for your group or organization)</span>
+      <%= f.text_field :name, required: true, class: "form-control" %>
+    </div>
+
+    <!-- Plan -->
+    <div class="form-group col-md-6 no-right-padding">
+      <%= f.label :plan %>
+      <%= f.select :plan, options_for_select(Plan.options, @tenant.plan), {}, required: true, class: "form-control" %>
+    </div>
+  </div>
+
+  <!-- Payment Fields -->
+  <div id="payment-fields" style="<%= @tenant.plan.downcase == 'free' ? 'display:none;' : '' %>">
+    <%= fields_for :payment, @tenant.payment || Payment.new do |p| %>
+      <div class="row">
+        <!-- Card Number -->
+        <div class="form-group col-md-4">
+          <%= p.label :card_number, "Card Number", data: { stripe: 'label' } %>
+          <%= p.text_field :card_number, class: "form-control", required: true, data: { stripe: 'number' } %>
+        </div>
+
+        <!-- CVV -->
+        <div class="form-group col-md-2">
+          <%= p.label :card_cvv, "Card CVV", data: { stripe: 'label' } %>
+          <%= p.text_field :card_cvv, class: "form-control", required: true, data: { stripe: 'cvv' } %>
+        </div>
+
+        <!-- Expiration -->
+        <div class="form-group col-md-6">
+          <%= p.label :card_expires, "Card Expires", class: "d-block", data: { stripe: 'label' } %>
+          <div class="row">
+            <div class="col-md-6">
+              <%= p.select :card_expires_month, options_for_select(Payment.month_options), { include_blank: 'Month' }, class: "form-control", required: true, data: { stripe: 'exp-month' } %>
+            </div>
+            <div class="col-md-6">
+              <%= p.select :card_expires_year, options_for_select(Payment.year_options), { include_blank: 'Year' }, class: "form-control", required: true, data: { stripe: 'exp-year' } %>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Submit -->
+  <div class="form-group mt-3">
+    <%= f.submit 'Update Plan', class: 'btn btn-primary' %>
+  </div>
+
+<% end %>
+
+<!-- JS to toggle payment fields -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const planSelect = document.querySelector('select[name="tenant[plan]"]');
+    const paymentFields = document.getElementById("payment-fields");
+
+    function togglePaymentFields() {
+      if (planSelect.value.toLowerCase() === "free") {
+        paymentFields.style.display = "none";
+        paymentFields.querySelectorAll("input, select").forEach(i => i.removeAttribute("required"));
+      } else {
+        paymentFields.style.display = "block";
+        paymentFields.querySelectorAll("input, select").forEach(i => i.setAttribute("required", "true"));
+      }
+    }
+
+    planSelect.addEventListener("change", togglePaymentFields);
+    togglePaymentFields(); // Initial check on page load
+  });
+</script>

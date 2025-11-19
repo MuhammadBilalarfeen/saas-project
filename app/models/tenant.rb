@@ -7,6 +7,10 @@ class Tenant < ApplicationRecord
 
   cattr_accessor :current_tenant
 
+  def tenant_params
+  params.require(:tenant).permit(:name, :plan, payment_attributes: [:card_number, :card_cvv, :card_expires_month, :card_expires_year])
+  end
+
   def self.set_current_tenant(tenant)
     self.current_tenant = tenant
   end
