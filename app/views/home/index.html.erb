@@ -1,0 +1,61 @@
+<% if current_user %>
+  <% if @tenant.present? %>
+    <div class="container mt-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>Organization: <%= @tenant.name %></h3>
+        <%= link_to 'New Project', new_tenant_project_path(@tenant), class: 'btn btn-success' if @tenant.can_create_projects? %>
+      </div>
+
+      <%= render 'projects/list' %>
+    </div>
+  <% else %>
+    <div class="container mt-4">
+      <h3>No organization assigned</h3>
+      <p class="lead">Please contact admin to be assigned to an organization.</p>
+    </div>
+  <% end %>
+<% else %>
+  <!-- Landing page for non-logged-in users -->
+  <div class="jumbotron py-5 bg-light text-center">
+    <div class="container">
+      <h1 class="display-5 mb-4">Welcome to the Project Management Application!</h1>
+      <p class="lead mb-4">
+        You'll love managing your projects with our SaaS application. Check out our plans below.
+      </p>
+
+      <div class="row justify-content-center">
+        <div class="col-md-4 mb-4">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body">
+              <h2 class="card-title">Free Plan</h2>
+              <h4 class="text-end text-muted">Price: Free</h4>
+              <ul class="list-unstyled mt-3 mb-4">
+                <li>Unlimited file uploads</li>
+                <li>Responsive design</li>
+                <li>Access anywhere</li>
+                <li>1 project</li>
+              </ul>
+              <%= link_to 'Sign Up', new_user_registration_path(plan: 'free'), class: 'btn btn-primary w-100' %>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body">
+              <h2 class="card-title">Premium Plan</h2>
+              <h4 class="text-end text-muted">Price: $10</h4>
+              <ul class="list-unstyled mt-3 mb-4">
+                <li>Unlimited file uploads</li>
+                <li>Responsive design</li>
+                <li>Access anywhere</li>
+                <li>Unlimited projects</li>
+              </ul>
+              <%= link_to 'Sign Up', new_user_registration_path(plan: 'premium'), class: 'btn btn-primary w-100' %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>

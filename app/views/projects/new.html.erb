@@ -1,0 +1,23 @@
+<% content_for :title, "New Project" %>
+
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8 col-md-10">
+
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h2 class="mb-0">Create New Project</h2>
+        </div>
+
+        <div class="card-body">
+          <%= render "form", project: @project %>
+        </div>
+
+        <div class="card-footer text-end">
+          <%= link_to "Back to Projects", tenant_projects_path(@tenant), class: "btn btn-secondary" %>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
