@@ -1,76 +1,76 @@
 class RegistrationsController < Devise::RegistrationsController
-
   def create
-    tenant_params  = params.require(:tenant).permit(:name, :plan)
-    user_params    = params.require(:user).permit(:email, :password, :password_confirmation)
-    payment_params = params[:payment] || {}
-    user_params    = params.merge({is_admin: true})
+    user_attrs   = params.require(:user).permit(:email, :password, :password_confirmation)
+    tenant_attrs = params.require(:tenant).permit(:name, :plan)
+    payment_attrs = params.fetch(:payment, {}).permit(:card_number, :card_cvv, :card_expires_month, :card_expires_year, :token)
+    payment_attrs = {} if tenant_attrs[:plan] == 'free'
 
+    user_attrs[:is_admin] = true
     sign_out(:user) if user_signed_in?
 
-    # Optional: recaptcha check
-    if defined?(verify_recaptcha) && !verify_recaptcha
-      flash[:error] = "Recaptcha did not match. Please try again."
-      build_resource(user_params)
-      render :new and return
-    end
+    build_resource(user_attrs)
 
+    saved = false
     Tenant.transaction do
-      @tenant = Tenant.new(tenant_params)
+      # Build tenant and associate with user as owner
+      @tenant = Tenant.new(tenant_attrs)
+      @tenant.owner = resource
 
       unless @tenant.save
         flash[:error] = @tenant.errors.full_messages.join(", ")
-        build_resource(user_params)
-        render :new and return
+        raise ActiveRecord::Rollback
       end
 
-      # Process premium payment if needed
-      if @tenant.plan == "premium"
-        @payment = Payment.new(
-          email: user_params[:email],
-          token: payment_params[:token],
-          tenant: @tenant
-        )
+      # Assign tenant to the user
+      resource.tenant = @tenant
 
+      # Generate random password if not provided
+      if resource.password.blank?
+        generated_password = Devise.friendly_token.first(12)
+        resource.password = generated_password
+        resource.password_confirmation = generated_password
+      end
+
+      unless resource.save
+        flash[:error] = resource.errors.full_messages.join(", ")
+        raise ActiveRecord::Rollback
+      end
+
+      # Send password reset email so user can set their password
+      resource.send_reset_password_instructions
+
+      # Premium plan payment
+      if @tenant.plan == "premium" && payment_attrs.present?
+        @payment = @tenant.build_payment(payment_attrs)
         unless @payment.valid?
-          flash[:error] = "Please check payment errors"
-          @tenant.destroy
-          render :new and return
+          flash[:error] = @payment.errors.full_messages.join(", ")
+          raise ActiveRecord::Rollback
         end
 
         begin
           @payment.process_payment
-          @payment.save
+          @payment.save!
         rescue => e
           flash[:error] = e.message
-          @tenant.destroy
-          render :new and return
+          raise ActiveRecord::Rollback
         end
       end
 
-      # Create user under the tenant
-      @user = User.new(user_params.merge(tenant_id: @tenant.id))
-
-      unless @user.save
-        flash[:error] = @user.errors.full_messages.join(", ")
-        raise ActiveRecord::Rollback
-      end
-
-      # If confirmable is enabled, do not auto sign-in
-      if @user.confirmed?
-        sign_in(:user, @user)
-        redirect_to root_path, notice: "Signup successful!"
-      else
-        # Sends confirmation email automatically
-        flash[:notice] = "Please check your email to confirm your account."
-        redirect_to root_path
-      end
+      saved = true
     end
+
+    if saved
+  # Sign in if user is already confirmed
+  if resource.confirmed?
+    sign_in(:user, resource)
+    notice_message = "Signup successful!"
+  else
+    notice_message = "Please check your email to confirm your account."
   end
 
-  protected
-
-  def after_sign_up_path_for(resource)
-    root_path
+   redirect_to root_path, notice: notice_message
+  else
+   render :new
   end
+ end
 end

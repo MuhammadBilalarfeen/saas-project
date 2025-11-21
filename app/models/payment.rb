@@ -1,23 +1,33 @@
 class Payment < ApplicationRecord
-  attr_accessor :card_number, :card_cvv, :card_expires_month, :card_expires_year
+  belongs_to :tenant
 
-  belongs_to :user
+  attr_accessor :token
+
+  validates :card_number, :card_cvv, :card_expires_month, :card_expires_year,
+          presence: true,
+          if: -> { tenant&.plan == 'premium' }
+
+  def process_payment
+    Stripe.api_key = ENV['STRIPE_SECRET_KEY']
+
+    customer = Stripe::Customer.create(
+      email: tenant.email,
+      source: token
+    )
+
+    Stripe::Charge.create(
+      customer: customer.id,
+      amount: 1000, # cents
+      currency: 'usd',
+      description: "Premium Plan Payment for #{tenant.name}"
+    )
+  end
 
   def self.month_options
-    Date::MONTHNAMES.compact.each_with_index.map { |name, i| ["#{i+1} - #{name}", i+1]}
+    (1..12).map { |m| [sprintf('%02d', m), m] }
   end
 
   def self.year_options
-    (Date.today.year..(Date.today.year+10)).to_a
+    (Date.today.year..Date.today.year+10).to_a
   end
-
-  def process_payment
-    customer = Stripe::Customer.create email: email, card: token
-
-    Stripe::Charge.create customer: customer.id, amount: 1000, description: 'premium', currency: 'usd'
-  end
-  
-
-
-
 end

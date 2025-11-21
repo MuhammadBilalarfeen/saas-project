@@ -1,15 +1,9 @@
-<%- model_class = Project -%>
-<%= form_for [@tenant, @project], html: { class: "form-horizontal project" } do |f| %>
+<%= form_for [@tenant || Tenant.current_tenant, @project], html: { class: "form-horizontal project" } do |f| %>
   <div class="page-header mb-4">
-    <h1><%= t('.title', default: model_class.model_name.human.pluralize.titleize) %></h1>
+    <h1>Projects</h1>
   </div>
 
- 
-
-  <%= f.hidden_field :tenant_id, value: params[:tenant_id] %>
-
-  
-  </div>
+  <%= f.hidden_field :tenant_id, value: @tenant.id if @tenant %>
 
   <% if @projects.present? %>
     <div class="table-responsive mt-4">
@@ -25,13 +19,13 @@
         <tbody>
           <% @projects.each do |project| %>
             <tr>
-              <td><%= link_to project.title, tenant_project_path(project, tenant_id: @tenant.id), class: 'text-decoration-none' %></td>
+              <td><%= link_to project.title, tenant_project_path(@tenant, project), class: 'text-decoration-none' %></td>
               <td><%= project.details %></td>
               <td><%= project.expected_completion_date %></td>
               <td class="d-flex gap-1">
-                <%= link_to 'Edit', edit_tenant_project_path(project, tenant_id: @tenant.id), class: 'btn btn-sm btn-info' %>
-                <%= link_to 'Edit Users', users_tenant_project_path(project, tenant_id: @tenant.id), :class => 'btn btn-default btn-xs' %>
-                <%= link_to 'Delete', tenant_project_path(project, tenant_id: @tenant.id), method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-sm btn-danger' %>
+                <%= link_to 'Edit', edit_tenant_project_path(@tenant, project), class: 'btn btn-sm btn-info' %>
+                <%= link_to 'Edit Users', users_tenant_project_path(@tenant, project), class: 'btn btn-sm btn-secondary' %>
+                <%= link_to 'Delete', tenant_project_path(@tenant, project), method: :delete, data: { confirm: 'Are you sure?' }, class: 'btn btn-sm btn-danger' %>
               </td>
             </tr>
           <% end %>
